@@ -1,4 +1,4 @@
-name: Frontend CI
+name: Frontend PR review
 
 on:
   push:
@@ -8,15 +8,25 @@ on:
       - 'frontend/my-app/**'
       - '.github/workflows/frontend-ci.yml'
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
     branches:
       - main
     paths:
       - 'frontend/my-app/**'
       - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-pr-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-lint:
-    name: Build and lint Next.js app
+    name: Build, test and lint Next.js app
     runs-on: ubuntu-latest
 
     defaults:
@@ -45,3 +55,44 @@ jobs:
 
       - name: Build app
         run: npm run build
+
+  claude-review:
+    name: Claude PR reviewer
+    needs: build-and-lint
+    if: github.event_name == 'pull_request' && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Review PR with Claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          direct_prompt: |
+            Review this React/Next.js PR with a focus on code quality, maintainability, and practical engineering risks.
+
+            Prioritize high-confidence findings and avoid trivial style-only comments.
+            Focus on:
+            - incorrect hook usage or missing dependencies
+            - unnecessary state, unnecessary re-renders, and misuse of useEffect
+            - React performance issues in components
+            - rendering or hydration problems in the Next.js App Router
+            - incorrect loading/error and async data handling
+            - basic accessibility issues in forms and buttons
+            - props, keys, memoization, and component composition issues
+            - security concerns and unsafe handling of user input
+            - server/client component patterns in Next.js
+
+            Respond in English and provide feedback in this format:
+            - severity: high|medium|low
+            - file: file path
+            - issue: brief problem description
+            - why: why this is a problem
+            - fix: concrete recommendation for the fix
+
+            If you do not find any clear issues, respond exactly:
+            No high-confidence issues found in this PR.
