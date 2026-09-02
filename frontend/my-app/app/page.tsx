@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
@@ -60,8 +61,14 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Documentation of this
+            Documentation of this flow
           </a>
+          <Link
+            href="/anti-pattern-demo"
+            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-red-500/60 bg-red-500/10 px-5 text-red-200 transition-colors hover:border-red-400 hover:bg-red-500/20 md:w-[200px]"
+          >
+            Anti-pattern demo
+          </Link>
         </div>
       </main>
     </div>
