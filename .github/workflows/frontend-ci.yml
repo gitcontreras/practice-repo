@@ -73,10 +73,11 @@ jobs:
           fetch-depth: 0
                 
       - name: Review PR with Claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@f4fb5c6cdccc1ee7af63692f5d08d56efaa64cc8
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          model: claude-3-5-sonnet-20241022  
           direct_prompt: |
             Review this React/Next.js PR with a focus on code quality, maintainability, and practical engineering risks.
 
