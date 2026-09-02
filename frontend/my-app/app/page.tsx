@@ -61,7 +61,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Documentation of this
+            Documentation of this flow
           </a>
           <Link
             href="/anti-pattern-demo"
